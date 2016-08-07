@@ -1,0 +1,6 @@
+
+<nav>
+    {{#foreach @blog.navigation}}
+        <a href="{{this.url}}">{{this.label}}</a> {{#unless @last}}|{{/unless}}
+    {{/foreach}}
+</nav>

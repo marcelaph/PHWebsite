@@ -1,0 +1,14 @@
+
+.black-block {
+    color: white;
+    background-color: $background-black;
+    margin: 0;
+    border: 1px solid transparent;
+
+    * {
+        color: inherit;
+    }
+
+    a:hover { color: white }
+
+}
