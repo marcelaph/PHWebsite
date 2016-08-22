@@ -9,6 +9,23 @@ channelConfig = function channelConfig() {
             route: '/',
             frontPageTemplate: 'home'
         },
+        
+        blog: {
+            name: 'blog',
+            route: '/blog/',
+            postOptions: {
+                filter: 'tags:\'published\''
+            },
+            data: {
+                tag: {
+                    type: 'read',
+                    resource: 'tags',
+                    options: {slug: 'blog'}
+                }
+            },
+            slugTemplate: true
+        },
+
         tag: {
             name: 'tag',
             route: '/' + config.routeKeywords.tag + '/:slug/',

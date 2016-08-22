@@ -8,13 +8,27 @@ require('./helpers')();
 var path = require('path'),
     config;
 
+console.log('Ghost URL is:', process.env.GHOST_URL);
+console.log('Email Service is:', process.env.GHOST_EMAIL_SERVICE);
+console.log('Email User is:', process.env.GHOST_EMAIL_LOGIN);
+
 config = {
     // ### Production
     // When running Ghost in the wild, use the production environment.
     // Configure your URL and mail settings here
     production: {
-        url: 'http://127.0.0.1:2368',
-        mail: {},
+        url: process.env.HEROKU_URL || process.env.GHOST_URL || 'http://localhost:2368',
+        mail: {
+            transport: 'SMTP',
+            options: {
+                service: process.env.GHOST_EMAIL_SERVICE,
+                auth: {
+                    user: process.env.GHOST_EMAIL_LOGIN,
+                    pass: process.env.GHOST_EMAIL_PASSWORD
+                }
+            }
+        },
+
         database: {
             client: 'sqlite3',
             connection: {
@@ -33,7 +47,18 @@ config = {
     development: {
         // The url to use when providing links to the site, E.g. in RSS and email.
         // Change this to your Ghost blog's published URL.
-        url: 'http://localhost:2368',
+        url: process.env.HEROKU_URL || process.env.GHOST_URL || 'http://localhost:2368',
+
+        mail: {
+            transport: 'SMTP',
+            options: {
+                service: process.env.GHOST_EMAIL_SERVICE,
+                auth: {
+                    user: process.env.GHOST_EMAIL_LOGIN,
+                    pass: process.env.GHOST_EMAIL_PASSWORD
+                }
+            }
+        },
 
         // Example refferer policy
         // Visit https://www.w3.org/TR/referrer-policy/ for instructions
