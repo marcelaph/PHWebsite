@@ -8,9 +8,9 @@ require('./helpers')();
 var path = require('path'),
     config;
 
-console.log('Ghost URL is:', process.env.GHOST_URL);
-console.log('Email Service is:', process.env.GHOST_EMAIL_SERVICE);
-console.log('Email User is:', process.env.GHOST_EMAIL_LOGIN);
+console.log('Ghost URL:', process.env.GHOST_URL);
+console.log('Email Service:', process.env.GHOST_EMAIL_SERVICE);
+console.log('Email User:', process.env.GHOST_EMAIL_LOGIN);
 
 config = {
     // ### Production
@@ -38,7 +38,7 @@ config = {
         },
 
         server: {
-            host: '127.0.0.1',
+            host: '0.0.0.0',
             port: '2368'
         }
     },
@@ -60,26 +60,6 @@ config = {
             }
         },
 
-        // Example refferer policy
-        // Visit https://www.w3.org/TR/referrer-policy/ for instructions
-        // default 'origin-when-cross-origin',
-        // referrerPolicy: 'origin-when-cross-origin',
-
-        // Example mail config
-        // Visit http://support.ghost.org/mail for instructions
-        // ```
-        //  mail: {
-        //      transport: 'SMTP',
-        //      options: {
-        //          service: 'Mailgun',
-        //          auth: {
-        //              user: '', // mailgun username
-        //              pass: ''  // mailgun password
-        //          }
-        //      }
-        //  },
-        // ```
-
         // #### Database
         // Ghost supports sqlite3 (default), MySQL & PostgreSQL
         database: {
@@ -93,7 +73,7 @@ config = {
         // Can be host & port (default), or socket
         server: {
             // Host to be passed to node's `net.Server#listen()`
-            host: '127.0.0.1',
+            host: '0.0.0.0',
             // Port to be passed to node's `net.Server#listen()`, for iisnode set this to `process.env.PORT`
             port: '2368'
         },
