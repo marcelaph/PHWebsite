@@ -6,6 +6,9 @@ import ShortcutsMixin from 'ghost-admin/mixins/shortcuts';
 import imageManager from 'ghost-admin/utils/ed-image-manager';
 import editorShortcuts from 'ghost-admin/utils/editor-shortcuts';
 import {invokeAction} from 'ember-invoke-action';
+import {ghUserCanAdmin} from 'ghost-admin/helpers/gh-user-can-admin';
+
+console.log('ghUserCanAdmin', ghUserCanAdmin);
 
 export default Component.extend(ShortcutsMixin, {
     tagName: 'section',
@@ -13,6 +16,7 @@ export default Component.extend(ShortcutsMixin, {
 
     activeTab: 'markdown',
     editor: null,
+    ghUserCanAdmin: ghUserCanAdmin,
     editorDisabled: undefined,
     editorScrollInfo: null, // updated when gh-ed-editor component scrolls
     height: null, // updated when markdown is rendered

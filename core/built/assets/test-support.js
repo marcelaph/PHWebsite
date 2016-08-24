@@ -20921,10 +20921,14 @@ define('ember-test-helpers/-legacy-overrides', ['exports', 'ember', 'ember-test-
 define('ember-test-helpers/abstract-test-module', ['exports', 'klassy', 'ember-test-helpers/wait', 'ember-test-helpers/test-context', 'ember'], function (exports, _klassy, _emberTestHelpersWait, _emberTestHelpersTestContext, _ember) {
   'use strict';
 
-  var assign = _ember['default'].assign || _ember['default'].merge;
+  // calling this `merge` here because we cannot
+  // actually assume it is like `Object.assign`
+  // with > 2 args
+  var merge = _ember['default'].assign || _ember['default'].merge;
 
   exports['default'] = _klassy.Klass.extend({
     init: function init(name, options) {
+      this.context = undefined;
       this.name = name;
       this.callbacks = options || {};
 
@@ -21019,12 +21023,28 @@ define('ember-test-helpers/abstract-test-module', ['exports', 'klassy', 'ember-t
     },
 
     setupContext: function setupContext(options) {
-      var config = assign({
+      var context = this.getContext();
+
+      merge(context, {
         dispatcher: null,
         inject: {}
-      }, options);
+      });
+      merge(context, options);
 
-      (0, _emberTestHelpersTestContext.setContext)(config);
+      (0, _emberTestHelpersTestContext.setContext)(context);
+      this.context = context;
+    },
+
+    setContext: function setContext(context) {
+      this.context = context;
+    },
+
+    getContext: function getContext() {
+      if (this.context) {
+        return this.context;
+      }
+
+      return this.context = (0, _emberTestHelpersTestContext.getContext)() || {};
     },
 
     setupAJAXListeners: function setupAJAXListeners() {
@@ -21249,7 +21269,7 @@ define('ember-test-helpers/test-module-for-acceptance', ['exports', 'ember-test-
     }
   });
 });
-define('ember-test-helpers/test-module-for-component', ['exports', 'ember-test-helpers/test-module', 'ember', 'ember-test-helpers/test-resolver', 'ember-test-helpers/has-ember-version', 'ember-test-helpers/-legacy-overrides'], function (exports, _emberTestHelpersTestModule, _ember, _emberTestHelpersTestResolver, _emberTestHelpersHasEmberVersion, _emberTestHelpersLegacyOverrides) {
+define('ember-test-helpers/test-module-for-component', ['exports', 'ember-test-helpers/test-module', 'ember', 'ember-test-helpers/has-ember-version', 'ember-test-helpers/-legacy-overrides'], function (exports, _emberTestHelpersTestModule, _ember, _emberTestHelpersHasEmberVersion, _emberTestHelpersLegacyOverrides) {
   'use strict';
 
   exports.setupComponentIntegrationTest = setupComponentIntegrationTest;
@@ -21328,7 +21348,7 @@ define('ember-test-helpers/test-module-for-component', ['exports', 'ember-test-h
 
     setupComponentUnitTest: function setupComponentUnitTest() {
       var _this = this;
-      var resolver = (0, _emberTestHelpersTestResolver.getResolver)();
+      var resolver = this.resolver;
       var context = this.context;
 
       var layoutName = 'template:components/' + this.componentName;
@@ -21555,7 +21575,7 @@ define('ember-test-helpers/test-module-for-component', ['exports', 'ember-test-h
     };
   }
 });
-define('ember-test-helpers/test-module-for-integration', ['exports', 'ember', 'ember-test-helpers/test-context', 'ember-test-helpers/abstract-test-module', 'ember-test-helpers/test-resolver', 'ember-test-helpers/build-registry', 'ember-test-helpers/has-ember-version', 'ember-test-helpers/-legacy-overrides', 'ember-test-helpers/test-module-for-component'], function (exports, _ember, _emberTestHelpersTestContext, _emberTestHelpersAbstractTestModule, _emberTestHelpersTestResolver, _emberTestHelpersBuildRegistry, _emberTestHelpersHasEmberVersion, _emberTestHelpersLegacyOverrides, _emberTestHelpersTestModuleForComponent) {
+define('ember-test-helpers/test-module-for-integration', ['exports', 'ember', 'ember-test-helpers/abstract-test-module', 'ember-test-helpers/test-resolver', 'ember-test-helpers/build-registry', 'ember-test-helpers/has-ember-version', 'ember-test-helpers/-legacy-overrides', 'ember-test-helpers/test-module-for-component'], function (exports, _ember, _emberTestHelpersAbstractTestModule, _emberTestHelpersTestResolver, _emberTestHelpersBuildRegistry, _emberTestHelpersHasEmberVersion, _emberTestHelpersLegacyOverrides, _emberTestHelpersTestModuleForComponent) {
   'use strict';
 
   var ACTION_KEY = undefined;
@@ -21566,6 +21586,11 @@ define('ember-test-helpers/test-module-for-integration', ['exports', 'ember', 'e
   }
 
   exports['default'] = _emberTestHelpersAbstractTestModule['default'].extend({
+    init: function init() {
+      this._super.apply(this, arguments);
+      this.resolver = this.callbacks.resolver || (0, _emberTestHelpersTestResolver.getResolver)();
+    },
+
     initSetupSteps: function initSetupSteps() {
       this.setupSteps = [];
       this.contextualizedSetupSteps = [];
@@ -21618,7 +21643,7 @@ define('ember-test-helpers/test-module-for-integration', ['exports', 'ember', 'e
     },
 
     setupContainer: function setupContainer() {
-      var resolver = (0, _emberTestHelpersTestResolver.getResolver)();
+      var resolver = this.resolver;
       var items = (0, _emberTestHelpersBuildRegistry['default'])(resolver);
 
       this.container = items.container;
@@ -21650,7 +21675,7 @@ define('ember-test-helpers/test-module-for-integration', ['exports', 'ember', 'e
         }
       });
 
-      var context = this.context = (0, _emberTestHelpersTestContext.getContext)();
+      var context = this.context;
 
       if (_ember['default'].setOwner) {
         _ember['default'].setOwner(context, this.container.owner);
@@ -21807,7 +21832,7 @@ define('ember-test-helpers/test-module-for-model', ['exports', 'ember-test-helpe
     }
   });
 });
-define('ember-test-helpers/test-module', ['exports', 'ember', 'ember-test-helpers/test-context', 'ember-test-helpers/abstract-test-module', 'ember-test-helpers/test-resolver', 'ember-test-helpers/build-registry', 'ember-test-helpers/has-ember-version'], function (exports, _ember, _emberTestHelpersTestContext, _emberTestHelpersAbstractTestModule, _emberTestHelpersTestResolver, _emberTestHelpersBuildRegistry, _emberTestHelpersHasEmberVersion) {
+define('ember-test-helpers/test-module', ['exports', 'ember', 'ember-test-helpers/abstract-test-module', 'ember-test-helpers/test-resolver', 'ember-test-helpers/build-registry', 'ember-test-helpers/has-ember-version'], function (exports, _ember, _emberTestHelpersAbstractTestModule, _emberTestHelpersTestResolver, _emberTestHelpersBuildRegistry, _emberTestHelpersHasEmberVersion) {
   'use strict';
 
   function _typeof(obj) { return obj && obj.constructor === Symbol ? 'symbol' : typeof obj; }
@@ -21825,6 +21850,7 @@ define('ember-test-helpers/test-module', ['exports', 'ember', 'ember-test-helper
       this.description = description || subjectName;
       this.name = description || subjectName;
       this.callbacks = callbacks || {};
+      this.resolver = this.callbacks.resolver || (0, _emberTestHelpersTestResolver.getResolver)();
 
       if (this.callbacks.integration && this.callbacks.needs) {
         throw new Error("cannot declare 'integration: true' and 'needs' in the same module");
@@ -21929,10 +21955,8 @@ define('ember-test-helpers/test-module', ['exports', 'ember', 'ember-test-helper
         }
       });
 
-      var context = this.context = (0, _emberTestHelpersTestContext.getContext)();
-
       if (_ember['default'].setOwner) {
-        _ember['default'].setOwner(context, this.container.owner);
+        _ember['default'].setOwner(this.context, this.container.owner);
       }
 
       this.setupInject();
@@ -22046,7 +22070,7 @@ define('ember-test-helpers/test-module', ['exports', 'ember', 'ember-test-helper
     },
 
     _setupContainer: function _setupContainer(isolated) {
-      var resolver = (0, _emberTestHelpersTestResolver.getResolver)();
+      var resolver = this.resolver;
 
       var items = (0, _emberTestHelpersBuildRegistry['default'])(!isolated ? resolver : Object.create(resolver, {
         resolve: {
@@ -22066,7 +22090,7 @@ define('ember-test-helpers/test-module', ['exports', 'ember', 'ember-test-helper
     },
 
     _setupIsolatedContainer: function _setupIsolatedContainer() {
-      var resolver = (0, _emberTestHelpersTestResolver.getResolver)();
+      var resolver = this.resolver;
       this._setupContainer(true);
 
       var thingToRegisterWith = this.registry || this.container;
